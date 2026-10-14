@@ -4,7 +4,7 @@ const path = require('path');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
-const authMiddleware = require('./middlewares/authMiddleware');
+const authMiddleware = require('./middlewares/authMiddlaware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;

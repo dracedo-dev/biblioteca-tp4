@@ -51,3 +51,19 @@ exports.logout = (req, res) => {
         res.redirect('/login');
     });
 };
+
+// Crear un usuario administrador inicial
+exports.postRegistro = async (req, res) => {
+    const { nombre, apellido, email, password } = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await pool.query(
+            'INSERT INTO usuario (nombre, apellido, email, password) VALUES (?, ?, ?, ?)',
+            [nombre, apellido, email, hashedPassword]
+        );
+        res.send('✅ Usuario creado correctamente. Volvé a <a href="/login">Login</a>');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al registrar usuario: ' + error.message);
+    }
+};
