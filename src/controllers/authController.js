@@ -67,3 +67,29 @@ exports.postRegistro = async (req, res) => {
         res.status(500).send('Error al registrar usuario: ' + error.message);
     }
 };
+
+// Renderizar vista de Registro
+exports.getRegistro = (req, res) => {
+    res.render('registro');
+};
+
+// Procesar el registro e insertar en la base de datos con contraseña encriptada
+exports.postRegistro = async (req, res) => {
+    const { nombre, apellido, email, password } = req.body;
+
+    try {
+        // Encriptar la contraseña
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insertar en la tabla usuario
+        await pool.query(
+            'INSERT INTO usuario (nombre, apellido, email, password) VALUES (?, ?, ?, ?)',
+            [nombre, apellido, email, hashedPassword]
+        );
+
+        res.redirect('/login');
+    } catch (error) {
+        console.error('Error en postRegistro:', error);
+        res.status(500).send('Error al registrar usuario: ' + error.message);
+    }
+};
