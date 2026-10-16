@@ -3,46 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Biblioteca</title>
-    <!-- Bootstrap 5 CDN & Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <title>Sistema de Gestión de Biblioteca</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body class="bg-light d-flex flex-column min-vh-100">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="/dashboard"><i class="bi bi-book"></i> Biblioteca</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <a class="navbar-brand fw-bold" href="/dashboard">
+                <i class="bi bi-book-half"></i> Biblioteca
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/socios"><i class="bi bi-people"></i> Socios</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/libros"><i class="bi bi-journal-bookmark"></i> Libros</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/prestamos"><i class="bi bi-arrow-left-right"></i> Préstamos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/categorias"><i class="bi bi-tags"></i> Categorías</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/autores"><i class="bi bi-person-badge"></i> Autores</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/editoriales"><i class="bi bi-building"></i> Editoriales</a>
-                    </li>
-                </ul>
-                <div class="d-flex align-items-center text-white">
-                    <span class="me-3"><i class="bi bi-person-circle"></i> <%= usuario ? usuario.nombre : '' %></span>
-                    <a href="/logout" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
-                </div>
+                <% if (usuario) { %>
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/socios"><i class="bi bi-people"></i> Socios</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/libros"><i class="bi bi-journal-bookmark"></i> Libros</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/prestamos"><i class="bi bi-arrow-left-right"></i> Préstamos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/categorias"><i class="bi bi-tags"></i> Categorías</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/autores"><i class="bi bi-person-badge"></i> Autores</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/editoriales"><i class="bi bi-building"></i> Editoriales</a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="navbar-text text-white">
+                            <i class="bi bi-person-circle"></i> <%= usuario.nombre || usuario.email || 'Usuario' %>
+                        </span>
+                        <a href="/logout" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+                    </div>
+                <% } %>
             </div>
         </div>
     </nav>
 
-    <div class="container">
+    <main class="container my-4 flex-grow-1">
