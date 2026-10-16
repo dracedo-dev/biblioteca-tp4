@@ -4,11 +4,12 @@ const path = require('path');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
-const authMiddleware = require('./middlewares/authMiddlaware');
+const authMiddleware = require('./middlewares/authMiddleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const socioRoutes = require('./routes/socioRoutes');
 // Configuración de Vistas (EJS)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -33,6 +34,9 @@ app.use((req, res, next) => {
 
 // Rutas Públicas de Autenticación
 app.use('/', authRoutes);
+
+// Rutas Protegidas
+app.use('/socios', socioRoutes);
 
 // Ruta Protegida: Dashboard
 app.get('/dashboard', authMiddleware, (req, res) => {
