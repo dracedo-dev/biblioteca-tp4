@@ -14,6 +14,7 @@ const libroRoutes = require('./routes/libroRoutes');
 const categoriaRoutes = require('./routes/categoriaRoutes');
 const autorRoutes = require('./routes/autorRoutes');
 const editorialRoutes = require('./routes/editorialRoutes');
+const prestamoRoutes = require('./routes/prestamoRoutes');
 
 // Configuración de Vistas (EJS)
 app.set('view engine', 'ejs');
@@ -46,6 +47,7 @@ app.use('/libros', libroRoutes);
 app.use('/categorias', categoriaRoutes);
 app.use('/autores', autorRoutes);
 app.use('/editoriales', editorialRoutes);
+app.use('/prestamos', prestamoRoutes);
 
 // Ruta Protegida: Dashboard
 app.get('/dashboard', authMiddleware, (req, res) => {
