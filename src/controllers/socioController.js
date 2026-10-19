@@ -1,13 +1,63 @@
 const pool = require('../config/db');
 
-// Listar todos los socios
+// Listar Socios (Buscador + Paginación)
 exports.listarSocios = async (req, res) => {
+    const buscar = req.query.buscar || '';
+    const pagina = parseInt(req.query.pagina) || 1;
+    const limite = 5;
+    const offset = (pagina - 1) * limite;
+
     try {
-        const [socios] = await pool.query('SELECT * FROM socio ORDER BY id_socio DESC');
-        res.render('socios/index', { socios, error: null });
+        const [totalRows] = await pool.query(
+            'SELECT COUNT(*) as total FROM socio WHERE nombre LIKE ? OR apellido LIKE ? OR dni LIKE ?',
+            [`%${buscar}%`, `%${buscar}%`, `%${buscar}%`]
+        );
+        const totalRegistros = totalRows[0].total;
+        const totalPaginas = Math.ceil(totalRegistros / limite) || 1;
+
+        const [socios] = await pool.query(
+            'SELECT * FROM socio WHERE nombre LIKE ? OR apellido LIKE ? OR dni LIKE ? ORDER BY id_socio DESC LIMIT ? OFFSET ?',
+            [`%${buscar}%`, `%${buscar}%`, `%${buscar}%`, limite, offset]
+        );
+
+        res.render('socios/index', {
+            socios,
+            buscar,
+            paginaActual: pagina,
+            totalPaginas,
+            error: null
+        });
     } catch (error) {
         console.error('Error al listar socios:', error);
         res.status(500).send('Error al obtener la lista de socios');
+    }
+};
+
+// Crear Socio (No duplicados por DNI)
+exports.crearSocio = async (req, res) => {
+    const { nombre, apellido, dni, email, telefono } = req.body;
+
+    try {
+        const [existente] = await pool.query('SELECT * FROM socio WHERE dni = ?', [dni.trim()]);
+        if (existente.length > 0) {
+            const [socios] = await pool.query('SELECT * FROM socio ORDER BY id_socio DESC LIMIT 5');
+            return res.render('socios/index', {
+                socios,
+                buscar: '',
+                paginaActual: 1,
+                totalPaginas: 1,
+                error: 'Ya existe un socio registrado con ese número de DNI.'
+            });
+        }
+
+        await pool.query(
+            'INSERT INTO socio (nombre, apellido, dni, email, telefono) VALUES (?, ?, ?, ?, ?)',
+            [nombre.trim(), apellido.trim(), dni.trim(), email ? email.trim() : null, telefono ? telefono.trim() : null]
+        );
+        res.redirect('/socios');
+    } catch (error) {
+        console.error('Error al crear socio:', error);
+        res.redirect('/socios');
     }
 };
 

@@ -5,12 +5,22 @@
     <a href="/prestamos/nuevo" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Nuevo Préstamo</a>
 </div>
 
+<!-- Barra de Búsqueda (Colocar sobre la tabla) -->
+<form action="" method="GET" class="d-flex gap-2 mb-3 col-md-5">
+    <input type="text" name="buscar" value="<%= buscar %>" class="form-control" placeholder="Buscar...">
+    <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search"></i></button>
+    <% if (buscar) { %>
+        <a href="?" class="btn btn-outline-danger">Limpiar</a>
+    <% } %>
+</form>
+
 <div class="card shadow-sm">
     <div class="card-body">
         <table class="table table-hover align-middle mb-0">
             <thead class="table-dark">
                 <tr>
                     <th>Socio</th>
+                    <th>Libro</th>
                     <th>Fecha Préstamo</th>
                     <th>Devolución Prevista</th>
                     <th>Devolución Real</th>
@@ -21,12 +31,13 @@
             <tbody>
                 <% if (prestamos.length === 0) { %>
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">No hay préstamos registrados.</td>
+                        <td colspan="7" class="text-center py-4 text-muted">No hay préstamos registrados.</td>
                     </tr>
                 <% } else { %>
                     <% prestamos.forEach(p => { %>
                         <tr>
                             <td><strong><%= p.socio_nombre %> <%= p.socio_apellido %></strong> <br><small class="text-muted">DNI: <%= p.socio_dni %></small></td>
+                            <td><strong><%= p.libro_titulo || 'Sin especificar' %></strong></td>
                             <td><%= new Date(p.fecha_prestamo).toLocaleDateString('es-AR') %></td>
                             <td><%= new Date(p.fecha_vencimiento).toLocaleDateString('es-AR') %></td>
                             <td><%= p.fecha_devolucion ? new Date(p.fecha_devolucion).toLocaleDateString('es-AR') : '-' %></td>
@@ -55,5 +66,24 @@
         </table>
     </div>
 </div>
+
+<!-- Paginación (Colocar debajo de la tabla) -->
+<% if (totalPaginas > 1) { %>
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center mb-0">
+            <li class="page-item <%= paginaActual === 1 ? 'disabled' : '' %>">
+                <a class="page-link" href="?buscar=<%= buscar %>&pagina=<%= paginaActual - 1 %>">Anterior</a>
+            </li>
+            <% for (let i = 1; i <= totalPaginas; i++) { %>
+                <li class="page-item <%= paginaActual === i ? 'active' : '' %>">
+                    <a class="page-link" href="?buscar=<%= buscar %>&pagina=<%= i %>"><%= i %></a>
+                </li>
+            <% } %>
+            <li class="page-item <%= paginaActual === totalPaginas ? 'disabled' : '' %>">
+                <a class="page-link" href="?buscar=<%= buscar %>&pagina=<%= paginaActual + 1 %>">Siguiente</a>
+            </li>
+        </ul>
+    </nav>
+<% } %>
 
 <%- include('../partials/footer') %>

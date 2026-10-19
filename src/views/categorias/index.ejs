@@ -8,6 +8,14 @@
     <div class="alert alert-danger"><%= error %></div>
 <% } %>
 
+<form action="/categorias" method="GET" class="d-flex gap-2 mb-3">
+        <input type="text" name="buscar" value="<%= buscar %>" class="form-control" placeholder="Buscar categoría...">
+        <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search"></i></button>
+        <% if (buscar) { %>
+            <a href="/categorias" class="btn btn-outline-danger">Limpiar</a>
+        <% } %>
+    </form>
+
 <div class="row">
     <!-- Formulario para agregar categoría -->
     <div class="col-md-4 mb-4">
@@ -30,7 +38,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Tabla con el listado de categorías -->
     <div class="col-md-8">
         <div class="card shadow-sm">
