@@ -56,6 +56,9 @@
                                     <td><%= autor.nombre %> <%= autor.apellido %></td>
                                     <td><%= autor.nacionalidad || '-' %></td>
                                     <td class="text-end">
+                                        <a href="/autores/editar/<%= autor.id_autor %>" class="btn btn-sm btn-outline-warning">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
                                         <form action="/autores/eliminar/<%= autor.id_autor %>" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que querés eliminar este autor?');">
                                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                                 <i class="bi bi-trash"></i>

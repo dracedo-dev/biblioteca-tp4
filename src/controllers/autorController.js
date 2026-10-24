@@ -33,6 +33,42 @@ exports.crearAutor = async (req, res) => {
     }
 };
 
+// Ejemplo para Categoria (aplica exacto para Autor y Editorial cambiando nombres de tabla/campos)
+exports.getEditarAutor = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [rows] = await pool.query('SELECT * FROM autor WHERE id_autor = ?', [id]);
+        if (rows.length === 0) return res.redirect('/autores');
+        res.render('autores/editar', { autor: rows[0], error: null });
+    } catch (error) {
+        res.redirect('/autores');
+    }
+};
+
+exports.postEditarAutor = async (req, res) => {
+    const { id } = req.params;
+    const { nombre, apellido } = req.body;
+
+    try {
+        const [existente] = await pool.query(
+            'SELECT * FROM autor WHERE (LOWER(nombre) = LOWER(?) AND LOWER(apellido) = LOWER(?)) AND id_autor != ?',
+            [nombre.trim(), apellido.trim(), id]
+        );
+
+        if (existente.length > 0) {
+            return res.render('autores/editar', {
+                autor: { id_autor: id, nombre, apellido },
+                error: 'Ya existe otro autor con ese nombre y apellido.'
+            });
+        }
+
+        await pool.query('UPDATE autor SET nombre = ?, apellido = ? WHERE id_autor = ?', [nombre.trim(), apellido.trim(), id]);
+        res.redirect('/autores');
+    } catch (error) {
+        res.redirect('/autores');
+    }
+};
+
 // Eliminar autor
 exports.eliminarAutor = async (req, res) => {
     const { id } = req.params;

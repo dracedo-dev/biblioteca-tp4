@@ -8,6 +8,8 @@ router.use(authMiddleware);
 router.get('/', libroController.listarLibros);
 router.get('/nuevo', libroController.formularioNuevoLibro);
 router.post('/nuevo', libroController.crearLibro);
+router.get('/editar/:id', libroController.getEditarLibro); 
+router.post('/editar/:id', libroController.postEditarLibro);
 router.post('/eliminar/:id', libroController.eliminarLibro);
 
 module.exports = router;

@@ -61,7 +61,19 @@ exports.formularioEditar = async (req, res) => {
 };
 
 // Editar Categoría (con validación de NO duplicados)
-exports.actualizarCategoria = async (req, res) => {
+// Ejemplo para Categoria (aplica exacto para Autor y Editorial cambiando nombres de tabla/campos)
+exports.getEditarCategoria = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [rows] = await pool.query('SELECT * FROM categoria WHERE id_categoria = ?', [id]);
+        if (rows.length === 0) return res.redirect('/categorias');
+        res.render('categorias/editar', { categoria: rows[0], error: null });
+    } catch (error) {
+        res.redirect('/categorias');
+    }
+};
+
+exports.postEditarCategoria = async (req, res) => {
     const { id } = req.params;
     const { nombre } = req.body;
 

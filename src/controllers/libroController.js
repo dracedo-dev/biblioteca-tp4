@@ -16,7 +16,7 @@ exports.listarLibros = async (req, res) => {
         const totalPaginas = Math.ceil(totalRegistros / limite) || 1;
 
         const query = `
-            SELECT l.*, c.nombre AS categoria_nombre, a.nombre AS autor_nombre, e.nombre AS editorial_nombre
+            SELECT l.*, c.nombre AS categoria_nombre, a.nombre AS autor_nombre, a.apellido AS autor_apellido, e.nombre AS editorial_nombre
             FROM libro l
             LEFT JOIN categoria c ON l.id_categoria = c.id_categoria
             LEFT JOIN autor a ON l.id_autor = a.id_autor
@@ -123,6 +123,65 @@ exports.crearLibro = async (req, res) => {
         const [editoriales] = await pool.query('SELECT * FROM editorial');
         
         res.render('libros/nuevo', { categorias, autores, editoriales, error: 'Error al registrar el libro. Verificá que el ISBN no esté repetido.' });
+    }
+};
+
+// Renderizar formulario de edición de libro
+exports.getEditarLibro = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [libros] = await pool.query('SELECT * FROM libro WHERE id_libro = ?', [id]);
+        if (libros.length === 0) return res.redirect('/libros');
+
+        const [categorias] = await pool.query('SELECT * FROM categoria');
+        const [autores] = await pool.query('SELECT * FROM autor');
+        const [editoriales] = await pool.query('SELECT * FROM editorial');
+
+        res.render('libros/editar', {
+            libro: libros[0],
+            categorias,
+            autores,
+            editoriales,
+            error: null
+        });
+    } catch (error) {
+        console.error(error);
+        res.redirect('/libros');
+    }
+};
+
+// Procesar actualización de libro
+exports.postEditarLibro = async (req, res) => {
+    const { id } = req.params;
+    const { isbn, titulo, id_categoria, id_autor, id_editorial, anio_publicacion } = req.body;
+
+    try {
+        // Validar que el ISBN o Título no pertenezcan a OTRO libro diferente
+        const [existente] = await pool.query(
+            'SELECT * FROM libro WHERE (isbn = ? OR LOWER(titulo) = LOWER(?)) AND id_libro != ?',
+            [isbn.trim(), titulo.trim(), id]
+        );
+
+        if (existente.length > 0) {
+            const [categorias] = await pool.query('SELECT * FROM categoria');
+            const [autores] = await pool.query('SELECT * FROM autor');
+            const [editoriales] = await pool.query('SELECT * FROM editorial');
+            return res.render('libros/editar', {
+                libro: { id_libro: id, isbn, titulo, id_categoria, id_autor, id_editorial, anio_publicacion },
+                categorias, autores, editoriales,
+                error: 'Ya existe otro libro con ese mismo ISBN o título.'
+            });
+        }
+
+        await pool.query(
+            'UPDATE libro SET isbn = ?, titulo = ?, id_categoria = ?, id_autor = ?, id_editorial = ?, anio_publicacion = ? WHERE id_libro = ?',
+            [isbn.trim(), titulo.trim(), id_categoria, id_autor, id_editorial, anio_publicacion, id]
+        );
+
+        res.redirect('/libros');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/libros');
     }
 };
 

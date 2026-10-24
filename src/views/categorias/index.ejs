@@ -64,6 +64,9 @@
                                     <td><span class="badge bg-info text-dark"><%= cat.nombre %></span></td>
                                     <td><%= cat.descripcion || '-' %></td>
                                     <td class="text-end">
+                                        <a href="/categorias/editar/<%= cat.id_categoria %>" class="btn btn-sm btn-outline-warning">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
                                         <form action="/categorias/eliminar/<%= cat.id_categoria %>" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que querés eliminar esta categoría?');">
                                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                                 <i class="bi bi-trash"></i>

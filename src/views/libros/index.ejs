@@ -39,10 +39,15 @@
                             <td><strong><%= libro.titulo %></strong></td>
                             <td><%= libro.isbn || '-' %></td>
                             <td><%= libro.autor_nombre ? libro.autor_nombre + ' ' + libro.autor_apellido : '-' %></td>
-                            <td><span class="badge bg-info text-dark"><%= libro.categoria || 'Sin categoría' %></span></td>
-                            <td><%= libro.editorial || '-' %></td>
+                            <td><span class="badge bg-info text-dark"><%= libro.categoria_nombre || 'Sin categoría' %></span></td>
+                            <td><%= libro.editorial_nombre || '-' %></td>
                             <td><%= libro.anio_publicacion || '-' %></td>
+
+                            
                             <td class="text-end">
+                                <a href="/libros/editar/<%= libro.id_libro %>" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
                                 <form action="/libros/eliminar/<%= libro.id_libro %>" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que querés eliminar este libro?');">
                                     <button type="submit" class="btn btn-sm btn-outline-danger">
                                         <i class="bi bi-trash"></i>

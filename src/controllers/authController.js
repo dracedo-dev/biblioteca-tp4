@@ -70,7 +70,7 @@ exports.postRegistro = async (req, res) => {
 
 // Renderizar vista de Registro
 exports.getRegistro = (req, res) => {
-    res.render('registro');
+    res.render('registro', { error: null });
 };
 
 // Procesar el registro e insertar en la base de datos con contraseña encriptada
@@ -78,18 +78,35 @@ exports.postRegistro = async (req, res) => {
     const { nombre, apellido, email, password } = req.body;
 
     try {
-        // Encriptar la contraseña
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insertar en la tabla usuario
-        await pool.query(
-            'INSERT INTO usuario (nombre, apellido, email, password) VALUES (?, ?, ?, ?)',
-            [nombre, apellido, email, hashedPassword]
+        // 1. Validar si el email ya existe en la base de datos
+        const [usuarioExistente] = await pool.query(
+            'SELECT * FROM usuario WHERE email = ?',
+            [email.trim()]
         );
 
-        res.redirect('/login');
+        if (usuarioExistente.length > 0) {
+            return res.render('registro', {
+                error: 'El correo electrónico ya se encuentra registrado.'
+            });
+        }
+
+        // 2. Si no existe el email, encriptamos la contraseña e insertamos
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await pool.query(
+            'INSERT INTO usuario (nombre, apellido, email, password) VALUES (?, ?, ?, ?)',
+            [nombre, apellido, email.trim(), hashedPassword]
+        );
+
+        // Podés redirigir al login o enviar el mensaje de éxito
+        res.render('registro', { 
+            error: null,
+            mensajeExito: 'Usuario creado correctamente. Ya podés iniciar sesión.' 
+        });
+
     } catch (error) {
-        console.error('Error en postRegistro:', error);
-        res.status(500).send('Error al registrar usuario: ' + error.message);
+        console.error(error);
+        res.render('registro', {
+            error: 'Ocurrió un error al registrar el usuario: ' + error.message
+        });
     }
 };

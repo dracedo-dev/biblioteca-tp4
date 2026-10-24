@@ -83,7 +83,19 @@ exports.formularioEditar = async (req, res) => {
 };
 
 // Editar editorial con validación de NO duplicados
-exports.actualizarEditorial = async (req, res) => {
+// Ejemplo para Categoria (aplica exacto para Autor y Editorial cambiando nombres de tabla/campos)
+exports.getEditarEditorial = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [rows] = await pool.query('SELECT * FROM editorial WHERE id_editorial = ?', [id]);
+        if (rows.length === 0) return res.redirect('/editoriales');
+        res.render('editoriales/editar', { editorial: rows[0], error: null });
+    } catch (error) {
+        res.redirect('/editoriales');
+    }
+};
+
+exports.postEditarEditorial = async (req, res) => {
     const { id } = req.params;
     const { nombre } = req.body;
 

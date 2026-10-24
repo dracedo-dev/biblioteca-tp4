@@ -11,6 +11,18 @@
     <div class="card shadow-sm p-4" style="max-width: 450px; width: 100%;">
         <div class="card-body">
             <h3 class="card-title text-center mb-4">Registrar Nuevo Usuario</h3>
+
+            <% if (error) { %>
+                <div class="alert alert-danger" role="alert">
+                    <%= error %>
+                </div>
+            <% } %>
+            
+            <% if (typeof mensajeExito !== 'undefined' && mensajeExito) { %>
+                <div class="alert alert-success" role="alert">
+                    <%= mensajeExito %> <a href="/login" class="alert-link">Ir al Login</a>
+                </div>
+            <% } %>
             
             <form action="/registro" method="POST">
                 <div class="mb-3">

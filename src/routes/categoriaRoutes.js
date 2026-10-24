@@ -7,6 +7,8 @@ router.use(authMiddleware);
 
 router.get('/', categoriaController.listarCategorias);
 router.post('/nuevo', categoriaController.crearCategoria);
+router.get('/editar/:id', categoriaController.getEditarCategoria);
+router.post('/editar/:id', categoriaController.postEditarCategoria);
 router.post('/eliminar/:id', categoriaController.eliminarCategoria);
 
 module.exports = router;
