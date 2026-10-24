@@ -1,0 +1,42 @@
+<!-- Modal para Crear Nuevo Ejemplar -->
+<div class="modal fade" id="modalNuevoEjemplar" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/ejemplares/nuevo" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Registrar Nuevo Ejemplar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="codigo_inventario" class="form-label">Código de Inventario (Único)</label>
+                        <input type="text" class="form-control" id="codigo_inventario" name="codigo_inventario" placeholder="Ej: INV-001" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_libro" class="form-label">Libro Perteneciente</label>
+                        <select name="id_libro" id="id_libro" class="form-select" required>
+                            <option value="" disabled selected>Seleccione un libro...</option>
+                            <% libros.forEach(l => { %>
+                                <option value="<%= l.id_libro %>"><%= l.titulo %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="estado" class="form-label">Estado Inicial</label>
+                        <select name="estado" id="estado" class="form-select" required>
+                            <option value="Disponible" selected>Disponible</option>
+                            <option value="Dañado">Dañado</option>
+                            <option value="En mantenimiento">En mantenimiento</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Ejemplar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

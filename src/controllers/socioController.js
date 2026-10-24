@@ -117,6 +117,27 @@ exports.formularioEditarSocio = async (req, res) => {
     }
 };
 
+// Estado del Socio (Activo/Inactivo)
+exports.cambiarEstadoSocio = async (req, res) => {
+    const { id } = req.params;
+    try {
+        // Consultar el estado actual del socio
+        const [rows] = await pool.query('SELECT estado FROM socio WHERE id_socio = ?', [id]);
+        if (rows.length === 0) return res.redirect('/socios');
+
+        const estadoActual = rows[0].estado;
+        const nuevoEstado = estadoActual === 'Activo' ? 'Inactivo' : 'Activo';
+
+        // Actualizar al nuevo estado
+        await pool.query('UPDATE socio SET estado = ? WHERE id_socio = ?', [nuevoEstado, id]);
+
+        res.redirect('/socios');
+    } catch (error) {
+        console.error('Error al cambiar estado del socio:', error);
+        res.redirect('/socios');
+    }
+};
+
 // Actualizar socio
 exports.actualizarSocio = async (req, res) => {
     const { id } = req.params;

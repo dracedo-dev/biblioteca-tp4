@@ -110,6 +110,21 @@ exports.crearLibro = async (req, res) => {
     const { titulo, isbn, anio_publicacion, id_categoria, id_autor, id_editorial } = req.body;
 
     try {
+        // Validar que el año no sea superior al año actual
+        const anioActual = new Date().getFullYear();
+        if (parseInt(anio_publicacion) > anioActual) {
+            const [categorias] = await pool.query('SELECT * FROM categoria');
+            const [autores] = await pool.query('SELECT * FROM autor');
+            const [editoriales] = await pool.query('SELECT * FROM editorial');
+
+            return res.render('libros/nuevo', {
+                categorias,
+                autores,
+                editoriales,
+                error: `El año de publicación no puede ser superior al año actual (${anioActual}).`
+            });
+        }
+
         await pool.query(
             'INSERT INTO libro (titulo, isbn, anio_publicacion, id_categoria, id_autor, id_editorial) VALUES (?, ?, ?, ?, ?, ?)',
             [titulo, isbn, anio_publicacion, id_categoria || null, id_autor || null, id_editorial || null]
@@ -117,12 +132,17 @@ exports.crearLibro = async (req, res) => {
         res.redirect('/libros');
     } catch (error) {
         console.error('Error al crear libro:', error);
-        
+
         const [categorias] = await pool.query('SELECT * FROM categoria');
         const [autores] = await pool.query('SELECT * FROM autor');
         const [editoriales] = await pool.query('SELECT * FROM editorial');
-        
-        res.render('libros/nuevo', { categorias, autores, editoriales, error: 'Error al registrar el libro. Verificá que el ISBN no esté repetido.' });
+
+        res.render('libros/nuevo', {
+            categorias,
+            autores,
+            editoriales,
+            error: 'Error al registrar el libro. Verificá que el ISBN no esté repetido.'
+        });
     }
 };
 
@@ -156,6 +176,22 @@ exports.postEditarLibro = async (req, res) => {
     const { isbn, titulo, id_categoria, id_autor, id_editorial, anio_publicacion } = req.body;
 
     try {
+        // Validar que el año no sea superior al año actual
+        const anioActual = new Date().getFullYear();
+        if (parseInt(anio_publicacion) > anioActual) {
+            const [categorias] = await pool.query('SELECT * FROM categoria');
+            const [autores] = await pool.query('SELECT * FROM autor');
+            const [editoriales] = await pool.query('SELECT * FROM editorial');
+
+            return res.render('libros/editar', {
+                libro: { id_libro: id, isbn, titulo, id_categoria, id_autor, id_editorial, anio_publicacion },
+                categorias,
+                autores,
+                editoriales,
+                error: `El año de publicación no puede ser superior al año actual (${anioActual}).`
+            });
+        }
+
         // Validar que el ISBN o Título no pertenezcan a OTRO libro diferente
         const [existente] = await pool.query(
             'SELECT * FROM libro WHERE (isbn = ? OR LOWER(titulo) = LOWER(?)) AND id_libro != ?',
@@ -166,9 +202,12 @@ exports.postEditarLibro = async (req, res) => {
             const [categorias] = await pool.query('SELECT * FROM categoria');
             const [autores] = await pool.query('SELECT * FROM autor');
             const [editoriales] = await pool.query('SELECT * FROM editorial');
+
             return res.render('libros/editar', {
                 libro: { id_libro: id, isbn, titulo, id_categoria, id_autor, id_editorial, anio_publicacion },
-                categorias, autores, editoriales,
+                categorias,
+                autores,
+                editoriales,
                 error: 'Ya existe otro libro con ese mismo ISBN o título.'
             });
         }

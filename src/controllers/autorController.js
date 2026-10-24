@@ -2,12 +2,38 @@ const pool = require('../config/db');
 
 // Listar autores
 exports.listarAutores = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const offset = (page - 1) * limit;
+    const buscar = req.query.buscar ? req.query.buscar.trim() : '';
+
     try {
-        const [autores] = await pool.query('SELECT * FROM autor ORDER BY apellido, nombre ASC');
-        res.render('autores/index', { autores, error: null });
+        let query = 'SELECT * FROM autor';
+        let countQuery = 'SELECT COUNT(*) AS total FROM autor';
+        let queryParams = [];
+
+        if (buscar) {
+            query += ' WHERE nombre LIKE ?';
+            countQuery += ' WHERE nombre LIKE ?';
+            queryParams.push(`%${buscar}%`);
+        }
+
+        const [totalRows] = await pool.query(countQuery, queryParams);
+        const totalRegistros = totalRows[0].total;
+        const totalPaginas = Math.ceil(totalRegistros / limit);
+
+        query += ' ORDER BY id_autor DESC LIMIT ? OFFSET ?';
+        const [autores] = await pool.query(query, [...queryParams, limit, offset]);
+
+        res.render('autores/index', {
+            autores,
+            paginaActual: page,
+            totalPaginas,
+            buscar
+        });
     } catch (error) {
         console.error('Error al listar autores:', error);
-        res.status(500).send('Error al obtener la lista de autores');
+        res.redirect('/dashboard');
     }
 };
 

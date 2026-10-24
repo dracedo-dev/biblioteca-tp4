@@ -1,17 +1,41 @@
 const pool = require('../config/db');
 
-// Listar Categorías (con Buscador)
+// Listar Categorías (con Buscador y Paginación)
 exports.listarCategorias = async (req, res) => {
-    const buscar = req.query.buscar || '';
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5; // Cantidad de registros por página
+    const offset = (page - 1) * limit;
+    const buscar = req.query.buscar ? req.query.buscar.trim() : '';
+
     try {
-        const [categorias] = await pool.query(
-            'SELECT * FROM categoria WHERE nombre LIKE ? ORDER BY id_categoria DESC',
-            [`%${buscar}%`]
-        );
-        res.render('categorias/index', { categorias, buscar, error: null });
+        let query = 'SELECT * FROM categoria';
+        let countQuery = 'SELECT COUNT(*) AS total FROM categoria';
+        let queryParams = [];
+
+        if (buscar) {
+            query += ' WHERE nombre LIKE ?';
+            countQuery += ' WHERE nombre LIKE ?';
+            queryParams.push(`%${buscar}%`);
+        }
+
+        // Obtener el total de registros para calcular las páginas
+        const [totalRows] = await pool.query(countQuery, queryParams);
+        const totalRegistros = totalRows[0].total;
+        const totalPaginas = Math.ceil(totalRegistros / limit);
+
+        // Consulta paginada
+        query += ' ORDER BY id_categoria DESC LIMIT ? OFFSET ?';
+        const [categorias] = await pool.query(query, [...queryParams, limit, offset]);
+
+        res.render('categorias/index', {
+            categorias,
+            paginaActual: page,
+            totalPaginas,
+            buscar
+        });
     } catch (error) {
         console.error('Error al listar categorías:', error);
-        res.status(500).send('Error al cargar categorías');
+        res.redirect('/dashboard');
     }
 };
 

@@ -24,6 +24,7 @@
                     <th>Email</th>
                     <th>Teléfono</th>
                     <th>Dirección</th>
+                    <th>Estado</th>
                     <th class="text-end">Acciones</th>
                 </tr>
             </thead>
@@ -40,6 +41,15 @@
                             <td><%= socio.email %></td>
                             <td><%= socio.telefono || '-' %></td>
                             <td><%= socio.direccion || '-' %></td>
+                            <td>
+                                <a href="/socios/estado/<%= socio.id_socio %>" class="text-decoration-none">
+                                    <% if (socio.estado === 'Activo') { %>
+                                        <span class="badge bg-success">Activo</span>
+                                    <% } else { %>
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    <% } %>
+                                </a>
+                            </td>
                             <td class="text-end">
                                 <a href="/socios/editar/<%= socio.id_socio %>" class="btn btn-sm btn-outline-warning me-1">
                                     <i class="bi bi-pencil"></i>

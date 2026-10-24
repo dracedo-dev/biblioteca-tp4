@@ -4,7 +4,7 @@
     <h2><i class="bi bi-tags"></i> Gestión de Categorías</h2>
 </div>
 
-<% if (error) { %>
+<% if (typeof error !== 'undefined' && error) { %>
     <div class="alert alert-danger"><%= error %></div>
 <% } %>
 
@@ -82,5 +82,26 @@
         </div>
     </div>
 </div>
+
+<!-- Paginación-->
+<% if (totalPaginas > 1) { %>
+    <nav aria-label="Navegación de páginas" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item <%= paginaActual === 1 ? 'disabled' : '' %>">
+                <a class="page-link" href="/categorias?page=<%= paginaActual - 1 %>&buscar=<%= buscar %>">Anterior</a>
+            </li>
+
+            <% for (let i = 1; i <= totalPaginas; i++) { %>
+                <li class="page-item <%= paginaActual === i ? 'active' : '' %>">
+                    <a class="page-link" href="/categorias?page=<%= i %>&buscar=<%= buscar %>"><%= i %></a>
+                </li>
+            <% } %>
+
+            <li class="page-item <%= paginaActual === totalPaginas ? 'disabled' : '' %>">
+                <a class="page-link" href="/categorias?page=<%= paginaActual + 1 %>&buscar=<%= buscar %>">Siguiente</a>
+            </li>
+        </ul>
+    </nav>
+<% } %>
 
 <%- include('../partials/footer') %>

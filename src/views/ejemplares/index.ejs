@@ -1,0 +1,118 @@
+<%- include('../partials/header') %>
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-book-half me-2"></i>Gestión de Ejemplares</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoEjemplar">
+            <i class="bi bi-plus-circle me-1"></i>Nuevo Ejemplar
+        </button>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Código Inventario</th>
+                            <th>Libro</th>
+                            <th>Estado</th>
+                            <th class="text-center">Acciones / Cambiar Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (ejemplares.length === 0) { %>
+                            <tr>
+                                <td colspan="4" class="text-center py-3">No hay ejemplares registrados.</td>
+                            </tr>
+                        <% } else { %>
+                            <% ejemplares.forEach(ej => { %>
+                                <tr>
+                                    <td class="fw-bold"><%= ej.codigo_inventario %></td>
+                                    <td><%= ej.libro_titulo %></td>
+                                    <td>
+                                        <% if (ej.estado === 'Disponible') { %>
+                                            <span class="badge bg-success">Disponible</span>
+                                        <% } else if (ej.estado === 'Prestado') { %>
+                                            <span class="badge bg-warning text-dark">Prestado</span>
+                                        <% } else if (ej.estado === 'Dañado') { %>
+                                            <span class="badge bg-danger">Dañado</span>
+                                        <% } else { %>
+                                            <span class="badge bg-secondary">En mantenimiento</span>
+                                        <% } %>
+                                    </td>
+                                    <td class="text-center">
+                                        <!-- Formulario para cambiar estado del ejemplar -->
+                                        <form action="/ejemplares/estado/<%= ej.id_ejemplar %>" method="POST" class="d-inline-flex gap-1">
+                                            <select name="estado" class="form-select form-select-sm" style="width: 160px;">
+                                                <option value="Disponible" <%= ej.estado === 'Disponible' ? 'selected' : '' %>>Disponible</option>
+                                                <option value="Prestado" <%= ej.estado === 'Prestado' ? 'selected' : '' %>>Prestado</option>
+                                                <option value="Dañado" <%= ej.estado === 'Dañado' ? 'selected' : '' %>>Dañado</option>
+                                                <option value="En mantenimiento" <%= ej.estado === 'En mantenimiento' ? 'selected' : '' %>>En mantenimiento</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-outline-primary" title="Actualizar estado">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Crear Nuevo Ejemplar -->
+<div class="modal fade" id="modalNuevoEjemplar" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/ejemplares/nuevo" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Registrar Nuevo Ejemplar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="codigo_inventario" class="form-label">Código de Inventario (Único)</label>
+                        <input type="text" class="form-control" id="codigo_inventario" name="codigo_inventario" placeholder="Ej: INV-001" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_libro" class="form-label">Libro Perteneciente</label>
+                        <select name="id_libro" id="id_libro" class="form-select" required>
+                            <option value="" disabled selected>Seleccione un libro...</option>
+                            <% libros.forEach(l => { %>
+                                <option value="<%= l.id_libro %>"><%= l.titulo %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="estado" class="form-label">Estado Inicial</label>
+                        <select name="estado" id="estado" class="form-select" required>
+                            <option value="Disponible" selected>Disponible</option>
+                            <option value="Dañado">Dañado</option>
+                            <option value="En mantenimiento">En mantenimiento</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Ejemplar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

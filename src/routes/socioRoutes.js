@@ -6,6 +6,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 router.use(authMiddleware);
 
 router.get('/', socioController.listarSocios);
+router.get('/estado/:id', socioController.cambiarEstadoSocio);
 router.get('/nuevo', socioController.formularioNuevoSocio);
 router.post('/nuevo', socioController.crearSocio);
 router.get('/editar/:id', socioController.formularioEditarSocio);
