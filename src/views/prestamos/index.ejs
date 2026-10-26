@@ -5,82 +5,110 @@
     <a href="/prestamos/nuevo" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Nuevo Préstamo</a>
 </div>
 
-<!-- Barra de Búsqueda (Colocar sobre la tabla) -->
-<form action="" method="GET" class="d-flex gap-2 mb-3 col-md-5">
-    <input type="text" name="buscar" value="<%= buscar %>" class="form-control" placeholder="Buscar...">
-    <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search"></i></button>
-    <% if (buscar) { %>
-        <a href="?" class="btn btn-outline-danger">Limpiar</a>
-    <% } %>
+<!-- Formulario de Filtros de Préstamos -->
+<form action="/prestamos" method="GET" class="row g-3 mb-4">
+    <div class="col-md-3">
+        <label class="form-label">Socio (Nombre/DNI)</label>
+        <input type="text" name="socio" class="form-control" value="<%= filtros.socio || '' %>" placeholder="Buscar socio...">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Estado</label>
+        <select name="estado" class="form-select">
+            <option value="">Todos</option>
+            <option value="Activo" <%= filtros.estado === 'Activo' ? 'selected' : '' %>>Activos</option>
+            <option value="Devuelto" <%= filtros.estado === 'Devuelto' ? 'selected' : '' %>>Devueltos</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Desde</label>
+        <input type="date" name="fecha_desde" class="form-control" value="<%= filtros.fecha_desde || '' %>">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Hasta</label>
+        <input type="date" name="fecha_hasta" class="form-control" value="<%= filtros.fecha_hasta || '' %>">
+    </div>
+    <div class="col-md-3 d-flex align-items-end gap-2">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        <a href="/prestamos" class="btn btn-secondary">Limpiar</a>
+    </div>
 </form>
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
+        <table class="table table-striped align-middle">
+            <thead>
                 <tr>
                     <th>Socio</th>
-                    <th>Libro</th>
+                    <th>Libro(s)</th>
                     <th>Fecha Préstamo</th>
-                    <th>Devolución Prevista</th>
-                    <th>Devolución Real</th>
+                    <th>Vencimiento</th>
+                    <th>Devolución</th>
+                    <th>Atraso / Multa</th>
                     <th>Estado</th>
-                    <th class="text-end">Acciones</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                <% if (prestamos.length === 0) { %>
+                <% prestamos.forEach(p => { %>
                     <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">No hay préstamos registrados.</td>
+                        <td><%= p.socio_apellido %>, <%= p.socio_nombre %> <br><small class="text-muted">DNI: <%= p.dni %></small></td>
+                        <td><%= p.libros_titulos %></td>
+                        <td><%= p.fecha_prestamo ? new Date(p.fecha_prestamo).toLocaleDateString() : '-' %></td>
+                        <td><%= p.fecha_vencimiento ? new Date(p.fecha_vencimiento).toLocaleDateString() : '-' %></td>
+                        <td><%= p.fecha_devolucion ? new Date(p.fecha_devolucion).toLocaleDateString() : 'Pendiente' %></td>
+                        <td>
+                            <% if (p.estado === 'Devuelto' || (p.total_multa && p.total_multa > 0)) { %>
+                                <span class="text-danger fw-bold"><%= p.total_dias_atraso || 0 %> días / $<%= p.total_multa || '0.00' %></span>
+                            <% } else { %>
+                                <span class="text-muted">-</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <span class="badge bg-<%= p.estado === 'Activo' ? 'warning' : (p.estado === 'Devuelto' ? 'success' : 'danger') %>">
+                                <%= p.estado %>
+                            </span>
+                        </td>
+                        <td>
+                            <% if (p.estado === 'Activo') { %>
+                                <form action="/prestamos/devolver/<%= p.id_prestamo %>" method="POST" class="d-inline-flex align-items-center gap-1">
+                                    <select name="nuevo_estado_ejemplar" class="form-select form-select-sm" style="width: 130px;">
+                                        <option value="Disponible">Disponible</option>
+                                        <option value="Dañado">Dañado</option>
+                                        <option value="En mantenimiento">Mantenimiento</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-success" title="Registrar Devolución">Devolver</button>
+                                </form>
+                            <% } else { %>
+                                <span class="text-muted">Cerrado</span>
+                            <% } %>
+                        </td>
                     </tr>
-                <% } else { %>
-                    <% prestamos.forEach(p => { %>
-                        <tr>
-                            <td><strong><%= p.socio_nombre %> <%= p.socio_apellido %></strong> <br><small class="text-muted">DNI: <%= p.socio_dni %></small></td>
-                            <td><strong><%= p.libro_titulo || 'Sin especificar' %></strong></td>
-                            <td><%= new Date(p.fecha_prestamo).toLocaleDateString('es-AR') %></td>
-                            <td><%= new Date(p.fecha_vencimiento).toLocaleDateString('es-AR') %></td>
-                            <td><%= p.fecha_devolucion ? new Date(p.fecha_devolucion).toLocaleDateString('es-AR') : '-' %></td>
-                            <td>
-                                <% if (p.estado === 'Devuelto') { %>
-                                    <span class="badge bg-success">Devuelto</span>
-                                <% } else if (p.estado === 'Vencido') { %>
-                                    <span class="badge bg-danger">Vencido</span>
-                                <% } else { %>
-                                    <span class="badge bg-primary">Activo</span>
-                                <% } %>
-                            </td>
-                            <td class="text-end">
-                                <% if (p.estado === 'Activo') { %>
-                                    <form action="/prestamos/devolver/<%= p.id_prestamo %>" method="POST" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Marcar como devuelto">
-                                            <i class="bi bi-check-circle"></i> Devolver
-                                        </button>
-                                    </form>
-                                <% } %>
-                            </td>
-                        </tr>
-                    <% }); %>
-                <% } %>
+                <% }) %>
             </tbody>
         </table>
     </div>
 </div>
 
 <!-- Paginación (Colocar debajo de la tabla) -->
+<!-- Paginación con conservación de filtros -->
 <% if (totalPaginas > 1) { %>
     <nav class="mt-4">
         <ul class="pagination justify-content-center mb-0">
+            <!-- Botón Anterior -->
             <li class="page-item <%= paginaActual === 1 ? 'disabled' : '' %>">
-                <a class="page-link" href="?buscar=<%= buscar %>&pagina=<%= paginaActual - 1 %>">Anterior</a>
+                <a class="page-link" href="?pagina=<%= paginaActual - 1 %>&socio=<%= filtros.socio || '' %>&estado=<%= filtros.estado || '' %>&fecha_desde=<%= filtros.fecha_desde || '' %>&fecha_hasta=<%= filtros.fecha_hasta || '' %>">Anterior</a>
             </li>
+
+            <!-- Números de Página -->
             <% for (let i = 1; i <= totalPaginas; i++) { %>
                 <li class="page-item <%= paginaActual === i ? 'active' : '' %>">
-                    <a class="page-link" href="?buscar=<%= buscar %>&pagina=<%= i %>"><%= i %></a>
+                    <a class="page-link" href="?pagina=<%= i %>&socio=<%= filtros.socio || '' %>&estado=<%= filtros.estado || '' %>&fecha_desde=<%= filtros.fecha_desde || '' %>&fecha_hasta=<%= filtros.fecha_hasta || '' %>"><%= i %></a>
                 </li>
             <% } %>
+
+            <!-- Botón Siguiente -->
             <li class="page-item <%= paginaActual === totalPaginas ? 'disabled' : '' %>">
-                <a class="page-link" href="?buscar=<%= buscar %>&pagina=<%= paginaActual + 1 %>">Siguiente</a>
+                <a class="page-link" href="?pagina=<%= paginaActual + 1 %>&socio=<%= filtros.socio || '' %>&estado=<%= filtros.estado || '' %>&fecha_desde=<%= filtros.fecha_desde || '' %>&fecha_hasta=<%= filtros.fecha_hasta || '' %>">Siguiente</a>
             </li>
         </ul>
     </nav>

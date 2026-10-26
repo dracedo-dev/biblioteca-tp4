@@ -5,6 +5,14 @@
     <a href="/libros/nuevo" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Nuevo Libro</a>
 </div>
 
+<!-- Alerta de Error de Integridad vía Query URL -->
+<% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<% } %>
+
 <!-- Barra de Búsqueda (Colocar sobre la tabla) -->
 <form action="" method="GET" class="d-flex gap-2 mb-3 col-md-5">
     <input type="text" name="buscar" value="<%= buscar %>" class="form-control" placeholder="Buscar...">
@@ -42,13 +50,16 @@
                             <td><span class="badge bg-info text-dark"><%= libro.categoria_nombre || 'Sin categoría' %></span></td>
                             <td><%= libro.editorial_nombre || '-' %></td>
                             <td><%= libro.anio_publicacion || '-' %></td>
-
-                            
                             <td class="text-end">
+                                <a href="/libros/detalle/<%= libro.id_libro %>" class="btn btn-sm btn-outline-info" title="Ver Ejemplares">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            
                                 <a href="/libros/editar/<%= libro.id_libro %>" class="btn btn-sm btn-outline-warning">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <form action="/libros/eliminar/<%= libro.id_libro %>" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que querés eliminar este libro?');">
+
+                                <form action="/libros/eliminar/<%= libro.id_libro %>" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que querés eliminar?');">
                                     <button type="submit" class="btn btn-sm btn-outline-danger">
                                         <i class="bi bi-trash"></i>
                                     </button>

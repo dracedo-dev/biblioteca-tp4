@@ -11,31 +11,39 @@
                     <div class="alert alert-danger"><%= error %></div>
                 <% } %>
 
-                <form action="/prestamos/nuevo" method="POST">
+                <form action="/prestamos/nuevo" method="POST" id="formPrestamo">
                     <!-- Socio -->
                     <div class="mb-3">
                         <label for="id_socio" class="form-label">Socio Solicitante</label>
                         <select name="id_socio" id="id_socio" class="form-select" required>
                             <option value="">-- Seleccionar Socio --</option>
-                            <% socios.forEach(socio => { %>
-                                <option value="<%= socio.id_socio %>">
-                                    <%= socio.apellido %>, <%= socio.nombre %> (DNI: <%= socio.dni %>)
+                            <% socios.forEach(s => { %>
+                                <option value="<%= s.id_socio %>">
+                                    <%= s.apellido %>, <%= s.nombre %> (DNI: <%= s.dni %>)
                                 </option>
                             <% }); %>
                         </select>
                     </div>
-
-                    <!-- Libro -->
+                
+                    <!-- Ejemplares Disponibles (Selección Múltiple) -->
                     <div class="mb-3">
-                        <label for="id_libro" class="form-label">Libro a Prestar</label>
-                        <select name="id_libro" id="id_libro" class="form-select">
-                            <option value="">-- Seleccionar Libro --</option>
-                            <% libros.forEach(l => { %>
-                                <option value="<%= l.id_libro %>"><%= l.titulo %></option>
-                            <% }); %>
-                        </select>
+                        <label class="form-label fw-bold">Seleccionar Ejemplares Disponibles (Uno o más):</label>
+                        <div class="card p-3" style="max-height: 200px; overflow-y: auto;">
+                            <% if (typeof ejemplaresDisponibles !== 'undefined' && ejemplaresDisponibles.length > 0) { %>
+                                <% ejemplaresDisponibles.forEach(ej => { %>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="ejemplares" value="<%= ej.id_ejemplar %>" id="ej_<%= ej.id_ejemplar %>">
+                                        <label class="form-check-label" for="ej_<%= ej.id_ejemplar %>">
+                                            <strong><%= ej.titulo_libro %></strong> — Código: <code><%= ej.codigo_inventario %></code>
+                                        </label>
+                                    </div>
+                                <% }); %>
+                            <% } else { %>
+                                <p class="text-muted mb-0">No hay ejemplares disponibles en este momento.</p>
+                            <% } %>
+                        </div>
                     </div>
-
+                
                     <!-- Fechas -->
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -43,16 +51,37 @@
                             <input type="date" name="fecha_prestamo" id="fecha_prestamo" class="form-control" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="fecha_vencimiento" class="form-label">Fecha Vencimiento / Dev. Prevista</label>
+                            <label for="fecha_vencimiento" class="form-label">Fecha Vencimiento (Plazo 7 días)</label>
                             <input type="date" name="fecha_vencimiento" id="fecha_vencimiento" class="form-control" required>
                         </div>
                     </div>
-
+                
                     <div class="d-flex justify-content-between">
                         <a href="/prestamos" class="btn btn-secondary">Cancelar</a>
                         <button type="submit" class="btn btn-success">Guardar Préstamo</button>
                     </div>
                 </form>
+                
+                <script>
+                    // Automatizar fechas (Fecha actual y +7 días por defecto)
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const inputPrestamo = document.getElementById('fecha_prestamo');
+                        const inputVencimiento = document.getElementById('fecha_vencimiento');
+                    
+                        const hoy = new Date().toISOString().split('T')[0];
+                        inputPrestamo.value = hoy;
+                    
+                        const fechaV = new Date();
+                        fechaV.setDate(fechaV.getDate() + 7);
+                        inputVencimiento.value = fechaV.toISOString().split('T')[0];
+                        
+                        // Establecer mínimo para vencimiento
+                        inputPrestamo.addEventListener('change', () => {
+                            inputVencimiento.min = inputPrestamo.value;
+                        });
+                        inputVencimiento.min = hoy;
+                    });
+                </script>
             </div>
         </div>
     </div>

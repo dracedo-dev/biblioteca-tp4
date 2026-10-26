@@ -27,7 +27,7 @@ exports.listarEditoriales = async (req, res) => {
             buscar,
             paginaActual: pagina,
             totalPaginas,
-            error: null
+            error: req.query.error || null // Mostrar mensaje de error si existe en la query
         });
     } catch (error) {
         console.error('Error al listar editoriales:', error);
@@ -123,6 +123,13 @@ exports.postEditarEditorial = async (req, res) => {
 exports.eliminarEditorial = async (req, res) => {
     const { id } = req.params;
     try {
+        const [librosAsociados] = await pool.query('SELECT * FROM libro WHERE id_editorial = ?', [id]);
+        
+        if (librosAsociados.length > 0) {
+            const mensaje = encodeURIComponent('No se puede eliminar la editorial porque tiene libros asociados.');
+            return res.redirect(`/editoriales?error=${mensaje}`);
+        }
+
         await pool.query('DELETE FROM editorial WHERE id_editorial = ?', [id]);
         res.redirect('/editoriales');
     } catch (error) {

@@ -31,7 +31,8 @@ exports.listarCategorias = async (req, res) => {
             categorias,
             paginaActual: page,
             totalPaginas,
-            buscar
+            buscar,
+            error: req.query.error || null // Mostrar mensaje de error si existe en la query
         });
     } catch (error) {
         console.error('Error al listar categorías:', error);
@@ -121,10 +122,17 @@ exports.postEditarCategoria = async (req, res) => {
     }
 };
 
-// Eliminar Categoría
+// Eliminar categoría
 exports.eliminarCategoria = async (req, res) => {
     const { id } = req.params;
     try {
+        const [librosAsociados] = await pool.query('SELECT * FROM libro WHERE id_categoria = ?', [id]);
+        
+        if (librosAsociados.length > 0) {
+            const mensaje = encodeURIComponent('No se puede eliminar la categoría porque tiene libros asignados.');
+            return res.redirect(`/categorias?error=${mensaje}`);
+        }
+
         await pool.query('DELETE FROM categoria WHERE id_categoria = ?', [id]);
         res.redirect('/categorias');
     } catch (error) {

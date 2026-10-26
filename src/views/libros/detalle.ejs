@@ -1,0 +1,64 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Detalle del Libro</h2>
+        <a href="/libros" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Volver al Catálogo</a>
+    </div>
+
+    <!-- Información del Libro -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="card-title text-primary mb-3"><%= libro.titulo %></h4>
+            <div class="row">
+                <div class="col-md-4">
+                    <p class="mb-1"><strong>Autor:</strong></p>
+                    <p class="text-muted"><%= libro.autor_nombre || 'Sin autor' %></p>
+                </div>
+                <div class="col-md-4">
+                    <p class="mb-1"><strong>Categoría:</strong></p>
+                    <p><span class="badge bg-info text-dark"><%= libro.categoria_nombre || 'Sin categoría' %></span></p>
+                </div>
+                <div class="col-md-4">
+                    <p class="mb-1"><strong>ISBN:</strong></p>
+                    <p class="text-muted"><%= libro.isbn || 'N/A' %></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listado de Ejemplares -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Ejemplares Registrados</h5>
+        </div>
+        <div class="card-body">
+            <% if (ejemplares.length > 0) { %>
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID Ejemplar</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% ejemplares.forEach(ejemplar => { %>
+                            <tr>
+                                <td><strong>#<%= ejemplar.id_ejemplar %></strong></td>
+                                <td>
+                                    <span class="badge <%= ejemplar.estado === 'Disponible' ? 'bg-success' : 'bg-warning text-dark' %>">
+                                        <%= ejemplar.estado %>
+                                    </span>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <p class="text-muted mb-0">No hay ejemplares registrados para este libro.</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -29,7 +29,8 @@ exports.listarAutores = async (req, res) => {
             autores,
             paginaActual: page,
             totalPaginas,
-            buscar
+            buscar,
+            error: req.query.error || null // Mostrar mensaje de error si existe en la query
         });
     } catch (error) {
         console.error('Error al listar autores:', error);
@@ -99,6 +100,13 @@ exports.postEditarAutor = async (req, res) => {
 exports.eliminarAutor = async (req, res) => {
     const { id } = req.params;
     try {
+        const [librosAsociados] = await pool.query('SELECT * FROM libro WHERE id_autor = ?', [id]);
+        
+        if (librosAsociados.length > 0) {
+            const mensaje = encodeURIComponent('No se puede eliminar el autor porque tiene libros registrados.');
+            return res.redirect(`/autores?error=${mensaje}`);
+        }
+
         await pool.query('DELETE FROM autor WHERE id_autor = ?', [id]);
         res.redirect('/autores');
     } catch (error) {

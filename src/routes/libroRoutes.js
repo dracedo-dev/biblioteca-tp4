@@ -11,5 +11,6 @@ router.post('/nuevo', libroController.crearLibro);
 router.get('/editar/:id', libroController.getEditarLibro); 
 router.post('/editar/:id', libroController.postEditarLibro);
 router.post('/eliminar/:id', libroController.eliminarLibro);
+router.get('/detalle/:id', libroController.verDetalleLibro);
 
 module.exports = router;

@@ -31,7 +31,7 @@ exports.listarLibros = async (req, res) => {
             buscar,
             paginaActual: pagina,
             totalPaginas,
-            error: null
+            error: req.query.error || null // Mostrar mensaje de error si existe en la query
         });
     } catch (error) {
         console.error('Error al listar libros:', error);
@@ -225,13 +225,55 @@ exports.postEditarLibro = async (req, res) => {
 };
 
 // Eliminar libro
+// Eliminar libro
 exports.eliminarLibro = async (req, res) => {
     const { id } = req.params;
     try {
+        const [ejemplaresAsociados] = await pool.query('SELECT * FROM ejemplar WHERE id_libro = ?', [id]);
+        
+        if (ejemplaresAsociados.length > 0) {
+            const mensaje = encodeURIComponent('No se puede eliminar el libro porque tiene ejemplares registrados.');
+            return res.redirect(`/libros?error=${mensaje}`);
+        }
+
         await pool.query('DELETE FROM libro WHERE id_libro = ?', [id]);
         res.redirect('/libros');
     } catch (error) {
         console.error('Error al eliminar libro:', error);
         res.redirect('/libros');
+    }
+};
+
+// Ver detalle y ejemplares de un libro
+exports.verDetalleLibro = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Obtener la información del libro con su autor y categoría
+        const [libroRows] = await pool.query(`
+            SELECT l.*, a.nombre AS autor_nombre, c.nombre AS categoria_nombre 
+            FROM libro l
+            LEFT JOIN autor a ON l.id_autor = a.id_autor
+            LEFT JOIN categoria c ON l.id_categoria = c.id_categoria
+            WHERE l.id_libro = ?
+        `, [id]);
+
+        if (libroRows.length === 0) {
+            return res.status(404).send('Libro no encontrado');
+        }
+
+        // Obtener todos los ejemplares asociados a este libro
+        const [ejemplares] = await pool.query(`
+            SELECT * FROM ejemplar WHERE id_libro = ?
+        `, [id]);
+
+        res.render('libros/detalle', {
+            libro: libroRows[0],
+            ejemplares
+        });
+
+    } catch (error) {
+        console.error('Error al obtener el detalle del libro:', error);
+        res.status(500).send('Error al obtener el detalle del libro');
     }
 };
